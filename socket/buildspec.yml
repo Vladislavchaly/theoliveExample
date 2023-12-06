@@ -1,0 +1,34 @@
+version: 0.2
+
+env:
+  shell: bash
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $IMAGE_REPO_URL
+      - aws s3 cp s3://xxxclusive-infrastructure/docker/docker_key docker_key
+      - docker login -u xxxclusive --password-stdin < docker_key
+      - echo Get kubeconfig
+      - |-
+        if [ "$EKS_NAME" != "" ]; then
+          aws eks update-kubeconfig --name $EKS_NAME --region $AWS_DEFAULT_REGION
+          kubectl version
+        fi
+  build:
+    on-failure: ABORT
+    commands:
+      - echo Build started at `date`
+      - echo Building Docker image...
+      - docker build -f ./Socket/docker/node/Dockerfile.build -t xxxclusive/socket:$CODEBUILD_SOURCE_VERSION --build-arg api_base=$API_BASE .
+      - docker tag xxxclusive/socket:$CODEBUILD_SOURCE_VERSION $IMAGE_REPO_URL:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $IMAGE_REPO_URL:$IMAGE_TAG
+      - |-
+        if [ "$EKS_NAME" != "" ]; then
+          echo Rolling out to $EKS_NAME...
+          kubectl rollout restart deployment socket-deployment-$ENVIRONMENT
+        fi

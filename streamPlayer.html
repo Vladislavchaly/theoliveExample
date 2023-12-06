@@ -1,0 +1,51 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTMPS Streaming</title>
+</head>
+<body>
+<video id="video" width="640" height="480" controls></video>
+
+<script src="https://cdn.socket.io/4.1.2/socket.io.min.js" integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg" crossorigin="anonymous"></script>
+<script>
+    const socket = io("http://127.0.0.1:9999/", { transports: ["websocket"] });
+
+    socket.on('newClient', function () {
+        console.log('newClient!');
+    });
+    socket.on('maintenanceMode', function () {
+        console.log('maintenanceMode!');
+    });
+
+    socket.emit("fileUpload", "test");
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            console.log('Camera access granted.');
+            const videoElement = document.getElementById('video');
+            videoElement.srcObject = stream;
+
+            const mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.start(250);
+            // mediaRecorder.ondataavailable = function(e) {
+            //     console.log('e', e.data)
+            // }
+            mediaRecorder.ondataavailable = function(event) {
+                console.log(event)
+                if (event.data.size > 0) {
+                    console.log('event.data.size', event.data.size);
+                    socket.emit('stream', event.data);
+                }
+            };
+            // console.log(mediaRecorder.ondataavailable)
+            mediaRecorder.onstop = () => {
+                stream.getTracks().forEach(track => track.stop());
+            };
+        })
+        .catch(error => console.error('Error accessing camera:', error));
+</script>
+
+</body>
+</html>
