@@ -11,6 +11,7 @@ const io = new Server(httpServer, {
 
 const key = '84b6f036-c3cb-4516-8c53-23ac7a45d4ed'
 io.on('connection', (socket) => {
+
     const ops = [
         '-i', '-',
         '-c:v', 'libx264', '-preset', 'ultrafast', '-tune', 'zerolatency',
@@ -45,6 +46,7 @@ io.on('connection', (socket) => {
 
 
     socket.on('stream',  (data) => {
+        console.log('connected')
         ffmpeg_process.stdin.write(data);
     });
 })
