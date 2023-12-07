@@ -8,3 +8,12 @@ services:
     ports:
       - "9999:9999"
     restart: always
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx:ro
+    depends_on:
+      - node-app
