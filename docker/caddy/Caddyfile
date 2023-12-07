@@ -1,4 +1,5 @@
-https://3.143.105.162 {
+https://cityservice.pp.ua
+ {
 
     proxy / node-app:9999 {
       websocket
@@ -12,5 +13,5 @@ https://3.143.105.162 {
     #errors /var/log/caddy/error.log
 
     #tls self_signed
-    tls appcleaveradmin@gmail.com
+    tls appcleaveradmintest@gmail.com
 }
