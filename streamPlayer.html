@@ -11,16 +11,7 @@
 <script>
     const socket = io("http://127.0.0.1:9999/", { transports: ["websocket"] });
 
-    socket.on('newClient', function () {
-        console.log('newClient!');
-    });
-    socket.on('maintenanceMode', function () {
-        console.log('maintenanceMode!');
-    });
-
-    socket.emit("fileUpload", "test");
-
-    navigator.mediaDevices.getUserMedia({ video: true })
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
         .then(stream => {
             console.log('Camera access granted.');
             const videoElement = document.getElementById('video');
@@ -29,17 +20,14 @@
             const mediaRecorder = new MediaRecorder(stream);
 
             mediaRecorder.start(250);
-            // mediaRecorder.ondataavailable = function(e) {
-            //     console.log('e', e.data)
-            // }
+
             mediaRecorder.ondataavailable = function(event) {
-                console.log(event)
+
                 if (event.data.size > 0) {
-                    console.log('event.data.size', event.data.size);
                     socket.emit('stream', event.data);
                 }
             };
-            // console.log(mediaRecorder.ondataavailable)
+
             mediaRecorder.onstop = () => {
                 stream.getTracks().forEach(track => track.stop());
             };
