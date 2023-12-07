@@ -17,5 +17,6 @@ http {
             proxy_set_header Host $host;
             proxy_cache_bypass $http_upgrade;
         }
+
     }
 }

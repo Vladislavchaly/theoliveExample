@@ -1,0 +1,16 @@
+https://3.143.105.162 {
+
+    proxy / node-app:9999 {
+      websocket
+    	transparent
+    }
+
+    timeouts 5m
+    gzip
+    browse
+    #log /var/log/caddy/access.log
+    #errors /var/log/caddy/error.log
+
+    #tls self_signed
+    tls appcleaveradmin@gmail.com
+}
